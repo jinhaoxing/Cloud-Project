@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>主页</title>
+		<style>
+			#a {
+				color: red;
+			}
+			.b {
+				font-weight: bold;
+			}
+			.myClass {
+				background-color: black;
+			}
+			.myClass_white {
+				color: aliceblue;
+				background-color: blueviolet;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="demo"></div>
+	</body>
+	<script src="/modules/index.js"></script>
+	<script>
+		var app = new cloud({
+			data: {
+				data: [
+					{
+						name: 2,
+					},
+				],
+			},
+			components: {
+				start: function () {
+					var g = globalThis;
+					var className = "myClass";
+					this.className = "myClass_white";
+					var i = 0;
+					function change() {
+						g.data.push({
+							name: i++,
+						});
+					}
+					return `
+						div#a.b.{{className}}{{g.data[$].name+" 123    "}}{{g.data[$].name}}*{{g.data.length}}
+						+div>button.{{this.className}}{{"点击我"}}[{$click:change}]
+						+(div>font{{"我是文字"}}+br+span{{"我也是文字"}})>end{{
+							'你好',
+							{
+								type:"str",
+								content:"世界",
+								index:"2"
+							}
+						}}
+					`;
+				},
+				end: function (name, txt) {
+					return `
+					div{{txt.type}}
+						>div{{txt.content}}
+							>div{{txt.index}}
+					`;
+				},
+			},
+			run: function (vm) {
+				demo.appendChild(vm.start());
+			},
+		});
+	</script>
+</html>

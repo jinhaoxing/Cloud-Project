@@ -1,0 +1,1 @@
+this.x.$require("./map.js")
