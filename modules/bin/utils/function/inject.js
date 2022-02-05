@@ -1,5 +1,5 @@
 this.x.$require("../array/index.js").then(function () {
-	Function.prototype.inject = function (globalThis) {
+	Function.prototype._X_CLOUD_INJECT = function (globalThis) {
 		//注入
 		globalThis = globalThis || {};
 		globalThis._data_ = {};

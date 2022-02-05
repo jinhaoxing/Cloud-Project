@@ -26,7 +26,7 @@
 	</body>
 	<script src="/modules/index.js"></script>
 	<script>
-		var app = new cloud({
+		var app = new Xx({
 			data: {
 				data: [
 					{
@@ -35,6 +35,7 @@
 				],
 			},
 			components: {
+				end: "./link.js",
 				start: function () {
 					var g = globalThis;
 					var className = "myClass";
@@ -44,6 +45,9 @@
 						g.data.push({
 							name: i++,
 						});
+						setTimeout(() => {
+							g.data.splice(1, 1);
+						}, 1000);
 					}
 					return `
 						div#a.b.{{className}}{{g.data[$].name+" 123    "}}{{g.data[$].name}}*{{g.data.length}}
@@ -56,13 +60,6 @@
 								index:"2"
 							}
 						}}
-					`;
-				},
-				end: function (name, txt) {
-					return `
-					div{{txt.type}}
-						>div{{txt.content}}
-							>div{{txt.index}}
 					`;
 				},
 			},

@@ -785,7 +785,7 @@ x.globalEval = function (globalThis) {
 	var require = self.x.$require;
 	var path = self.x.$path;
 	var _CONFIGPATH_ = "./config.js"; //配置文件路径
-	function cloud(option) {
+	function Xx(option) {
 		var vm = this;
 		vm.option = {};
 		function initConfig(option) {
@@ -819,5 +819,5 @@ x.globalEval = function (globalThis) {
 		}
 		init(option);
 	}
-	self.cloud = cloud;
+	self.Xx = Xx;
 })(typeof global !== "undefined" ? global : typeof window !== "undefined" ? window : this);

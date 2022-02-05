@@ -67,7 +67,7 @@ self.x
 											type: "attr",
 										},
 									});
-									Object.map(v, function (key, value) {
+									Object.X_CLOUD_MAP(v, function (key, value) {
 										setTempDoc({
 											obj: temp,
 											prop: {
@@ -259,7 +259,6 @@ self.x
 									tempFrag = build(obj, i, {list: fragList, index: i});
 									push();
 									//添加到当前文档流
-									console.log(last);
 									i++;
 									n++;
 								}
@@ -292,9 +291,9 @@ self.x
 				}
 
 				var layoutMap = new Map();
-				Object.map(layout, function (key, value) {
+				Object.X_CLOUD_MAP(layout, function (key, value) {
 					var _proxy_;
-					layoutMap[key] = value.inject({
+					layoutMap[key] = value._X_CLOUD_INJECT({
 						run: function (ret) {
 							var obj = new createTree(ret, function (str) {
 								return layoutMap[str];

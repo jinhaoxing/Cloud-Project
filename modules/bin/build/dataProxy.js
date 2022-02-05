@@ -1,4 +1,4 @@
-this.x.$require("../utils/array/arguments.js").then(function () {
+this.x.$require("../utils/array/argToArr.js").then(function () {
 	var props = [];
 	//映射规则
 	var tempDoc;
@@ -30,14 +30,11 @@ this.x.$require("../utils/array/arguments.js").then(function () {
 		re: function (el) {
 			var v = el.get(el.value);
 			var d = v - el.oldValue;
-			console.log(v, el.oldValue);
 			if (d == 0) {
 				return;
 			} else if (d < 0) {
-				console.log(2);
 				el.fragList.del(-d);
 			} else {
-				console.log(d);
 				el.fragList.add(d);
 			}
 			el.oldValue = v;
@@ -159,34 +156,3 @@ this.x.$require("../utils/array/arguments.js").then(function () {
 
 	module.exports = [toProxy, setTempDoc];
 });
-
-//es6 proxy版本
-// function deepProxy(obj, cb) {
-// 	if (typeof obj === "object") {
-// 		for (let key in obj) {
-// 			if (typeof obj[key] === "object") {
-// 				obj[key] = deepProxy(obj[key], cb);
-// 			}
-// 		}
-// 	}
-
-// 	return new Proxy(obj, {
-// 		set: function (target, key, value, receiver) {
-// 			if (typeof value === "object") {
-// 				value = deepProxy(value, cb);
-// 			}
-
-// 			let cbType = target[key] == undefined ? "create" : "modify";
-
-// 			//排除数组修改length回调
-// 			if (!(Array.isArray(target) && key === "length")) {
-// 				cb(cbType, {target, key, value});
-// 			}
-// 			return Reflect.set(target, key, value, receiver);
-// 		},
-// 		deleteProperty(target, key) {
-// 			cb("delete", {target, key});
-// 			return Reflect.deleteProperty(target, key);
-// 		},
-// 	});
-// }
