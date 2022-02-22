@@ -4,28 +4,22 @@
 		<meta charset="UTF-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>主页</title>
-		<style>
-			#a {
-				color: red;
-			}
-			.b {
-				font-weight: bold;
-			}
-			.myClass {
-				background-color: black;
-			}
-			.myClass_white {
-				color: aliceblue;
-				background-color: blueviolet;
-			}
-		</style>
+		<title>Xx框架Demo</title>
 	</head>
 	<body>
 		<div id="demo"></div>
 	</body>
-	<script src="/modules/index.js"></script>
+	<script src="../modules/index.js"></script>
 	<script>
+		//1、path、require对象
+		// var path_ = x.$path.join(location.href, "./index.js");
+		// var path_A = x.$path.join(location.href, "./index_A.js");
+
+		// x.$require(path_, path_A).then(function (ret) {
+		// 	console.log(ret);
+		// });
+
+		// 2、框架
 		var app = new Xx({
 			data: {
 				data: [
@@ -36,7 +30,7 @@
 			},
 			components: {
 				end: "./link.js",
-				start: function () {
+				start: function (a) {
 					var g = globalThis;
 					var className = "myClass";
 					this.className = "myClass_white";
@@ -50,21 +44,23 @@
 						}, 1000);
 					}
 					return `
-						div#a.b.{{className}}{{g.data[$].name+" 123    "}}{{g.data[$].name}}*{{g.data.length}}
-						+div>button.{{this.className}}{{"点击我"}}[{$click:change}]
-						+(div>font{{"我是文字"}}+br+span{{"我也是文字"}})>end{{
-							'你好',
-							{
-								type:"str",
-								content:"世界",
-								index:"2"
-							}
-						}}
-					`;
+  					div#{{a}}.b.{{className}}{{g.data[$].name+" 123    "}}{{g.data[$].name}}*{{g.data.length}}
+  					+div>button.{{this.className}}{{a}}[{$click:change}]
+  					+(div>font{{"我是文字"}}+br+span{{"我也是文字"}})>end{{
+  						'你好',
+  						{
+  							type:"str",
+  							content:"世界",
+  							index:"2"
+  						}
+  					}}
+  				`;
 				},
+				//编译
+				//单向
 			},
 			run: function (vm) {
-				demo.appendChild(vm.start());
+				demo.appendChild(vm.start("点击"));
 			},
 		});
 	</script>

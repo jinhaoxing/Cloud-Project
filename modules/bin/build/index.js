@@ -290,7 +290,7 @@ self.x
 					return root;
 				}
 
-				var layoutMap = new Map();
+				var layoutMap = {};
 				Object.X_CLOUD_MAP(layout, function (key, value) {
 					var _proxy_;
 					layoutMap[key] = value._X_CLOUD_INJECT({

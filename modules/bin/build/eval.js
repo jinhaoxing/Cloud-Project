@@ -1,4 +1,4 @@
-module.exports = function (str, globalThis) {
+module.exports = function (_FUN_STR_, globalThis) {
 	//注入
-	return eval(str);
+	return eval(_FUN_STR_);
 };

@@ -237,17 +237,6 @@ createNode.prototype.set = function (val) {
 			if (val.type == v1) {
 				if (this.after == "set_ele") {
 					return this.set_ele(val.value);
-					// if (this.isC) {
-					// 	return this.set_data({value: val.value, type: "object"});
-					// } else {
-					// 	if (!this.ele) {
-					// 		return this.set_ele(val.value);
-					// 	}
-					// 	var t = this.set_child();
-					// 	t.isTxt = true; //文本节点
-					// 	t.data = {value: val.value, type: "object"};
-					// 	return this;
-					// }
 				} else if (this.after == "set_data") {
 					if (this.isC) {
 						return this.set_data({value: val.value, type: "object"});
