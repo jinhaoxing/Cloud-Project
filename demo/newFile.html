@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+	</head>
+	<body>
+		<div>
+			<input type="text" placeholder="请输入" onkeydown="searchNums" />
+		</div>
+		<script>
+			/*
+			   attrs:{
+           hasCollar, 是否有天鹅绒颈圈
+			     relics, 总遗物数量
+			     round, 总回合数
+			     round_battle, 当前战斗回合数
+			     round_robotic_arm, 获取到机械臂的回合数
+			     round_burner, 获取到香炉的回合数
+			     round_flower, 获取到小花的回合数
+			     curse, 诅咒牌数量
+			     resist_curse, 抵御的诅咒数量
+			     un_treasure, 未打开的宝箱数
+			     un_dolls_treasure, 未打开的套娃宝箱数
+			     un_eat_treasure, 未被恩洛斯吃掉的宝箱数
+			     card, 连续回合打出的总牌数
+			     card_ink, 获取墨水瓶时打出的总牌数
+			     card_attack, 连续回合打出的总攻击牌数
+			     card_attack_nunchaku, 获取双节棍时连续回合打出的攻击总牌数
+			     card_attack_pen, 获取钢笔尖时连续回合打出的攻击总牌数
+			     round_card, 当前回合打出的总牌数
+			     round_attack_card, 当前回合打出的攻击牌数
+			     round_skill_card, 当前回合打出的技能牌数
+			     fitness, 举重的次数
+			     fly, 飞靴的次数
+			     shuffle, 洗牌的次数
+			   }
+			   */
+			const initAttrs = {
+				round: 0,
+				round_battle: 0,
+				round_robotic_arm: 0,
+				round_burner: 0,
+				round_flower: 0,
+				relics: 0,
+				curse: 0,
+				resist_curse: 0,
+				un_treasure: 0,
+				un_dolls_treasure: 0,
+				un_eat_treasure: 0,
+				card: 0,
+				card_ink: 0,
+				card_attack: 0,
+				card_attack_nunchaku: 0,
+				card_attack_pen: 0,
+				round_card: 0,
+				round_attack_card: 0,
+				round_skill_card: 0,
+				fitness: 0,
+				fly: 0,
+				shuffle: 0,
+			};
+
+			// 设置随机属性值
+			const setRandomAttrs = {
+				round(attrs) {
+					attrs.round = generateRandomNumber(999, 10);
+				},
+				card(attrs) {
+					attrs.card = generateRandomNumber(999, 10);
+				},
+				round_battle(attrs) {
+					attrs.round_battle = generateRandomNumber(7);
+				},
+				round_robotic_arm(attrs) {
+					attrs.round_robotic_arm = generateRandomNumber(attrs.round);
+				},
+				round_burner(attrs) {
+					attrs.round_burner = generateRandomNumber(attrs.round);
+				},
+				round_flower(attrs) {
+					attrs.round_flower = generateRandomNumber(attrs.round);
+				},
+				curse(attrs) {
+					// 诅咒牌的数量上限暂定为10
+					attrs.curse = generateRandomNumber(10);
+				},
+				resist_curse(attrs) {
+					attrs.resist_curse = generateRandomNumber(2, 1);
+				},
+				un_treasure(attrs) {
+					attrs.un_treasure = generateRandomNumber(4, 1);
+				},
+				un_dolls_treasure(attrs) {
+					attrs.un_dolls_treasure = generateRandomNumber(2, 1);
+				},
+				un_eat_treasure(attrs) {
+					attrs.un_eat_treasure = 1;
+				},
+				card_ink(attrs) {
+					attrs.card_ink = generateRandomNumber(attrs.card);
+				},
+				card_attack(attrs) {
+					attrs.card_attack = generateRandomNumber(attrs.card);
+				},
+				card_attack_nunchaku(attrs) {
+					attrs.card_attack_nunchaku = generateRandomNumber(attrs.card_attack);
+				},
+				card_attack_pen(attrs) {
+					attrs.card_attack_pen = generateRandomNumber(attrs.card_attack);
+				},
+				round_card(attrs) {
+					attrs.round_card = generateRandomNumber(attrs.hasCollar ? 6 : attrs.card);
+				},
+				round_attack_card(attrs) {
+					attrs.round_attack_card = generateRandomNumber(attrs.round_card);
+				},
+				round_skill_card(attrs) {
+					attrs.round_skill_card = generateRandomNumber(attrs.round_card - attrs.round_attack_card);
+				},
+				fitness(attrs) {
+					attrs.fitness = generateRandomNumber(3);
+				},
+				fly(attrs) {
+					attrs.fly = generateRandomNumber(3, 1);
+				},
+				shuffle(attrs) {
+					attrs.shuffle = generateRandomNumber(2);
+				},
+			};
+			// 所有属性的顺序
+			const attrsKeys = [
+				"round",
+				"card",
+				"round_battle",
+				"round_robotic_arm",
+				"round_burner",
+				"round_flower",
+				"curse",
+				"resist_curse",
+				"un_treasure",
+				"un_dolls_treasure",
+				"un_eat_treasure",
+				"card_ink",
+				"card_attack",
+				"card_attack_nunchaku",
+				"card_attack_pen",
+				"round_card",
+				"round_attack_card",
+				"round_skill_card",
+				"fitness",
+				"fly",
+				"shuffle",
+			];
+			const relicsData = [
+				{
+					name: "巫毒娃娃",
+					id: 0,
+					min: 0,
+					max: 2,
+					init(attrs) {
+						attrs.curse = 0;
+					},
+					get(attrs) {
+						return attrs.curse;
+					},
+					set(num) {
+						attrs.curse = num;
+					},
+					check(attrs, relicsList) {
+						return true;
+					},
+					handle() {},
+					// 完成难度为1-10的数字，越大代表难度越高，总的完成难度为所有难度相乘
+					getDifficulty(num) {
+						// 难度和诅咒牌数量成正比
+						return (num + 1) * (num + 1);
+					},
+				},
+				{
+					name: "怀表",
+					id: 1,
+					min: 0,
+					max: 999,
+					init(attrs) {
+						attrs.round_card = 0;
+					},
+					get(attrs) {
+						return attrs.round_card;
+					},
+					set(num) {
+						attrs.curse = num;
+					},
+					check(relicsList, attrs) {
+						return true;
+					},
+					handle() {},
+					getDifficulty(num) {
+						// 作为无副作用遗物，难度固定
+						return 1;
+					},
+				},
+				{
+					name: "小宝箱",
+					id: 2,
+					min: 1,
+					max: 4,
+					init(attrs) {
+						attrs.un_treasure = 4;
+					},
+					get(attrs, index) {
+						return attrs.un_treasure;
+					},
+					set(num) {
+						attrs.un_treasure = num;
+					},
+					check() {
+						return true;
+					},
+					handle() {},
+					getDifficulty(num, attrs, index) {
+						// 拿到小宝箱后要控制开启箱子的数量，因此有难度
+						const dis = Math.abs(num + (attrs.relics - 1 - index) / 4 - 4); // 预期偏差
+						// 每多一个偏差，难度乘以5，因为可以选择不打开宝箱
+						return Math.pow(5, dis);
+					},
+				},
+				{
+					name: "壶铃",
+					id: 3,
+					min: 0,
+					max: 3,
+					init(attrs) {
+						attrs.fitness = 0;
+					},
+					get(attrs) {
+						return attrs.fitness;
+					},
+					set(num) {
+						attrs.fitness = num;
+					},
+					check() {
+						return true;
+					},
+					handle() {},
+					getDifficulty(num) {
+						// 作为无副作用遗物，难度固定
+						return 1;
+					},
+				},
+				{
+					name: "飞靴",
+					id: 4,
+					min: 1,
+					max: 3,
+					init(attrs) {
+						attrs.fly = 3;
+					},
+					get(attrs) {
+						return attrs.fly;
+					},
+					set(num) {
+						attrs.fly = num;
+					},
+					check() {
+						return true;
+					},
+					handle() {},
+					getDifficulty(num, attrs, index) {
+						// 越早拿到越好控制层数
+						const dis = attrs.relics - 1 - index;
+						return dis <= 1 && num !== 3 ? 3 : 1;
+					},
+				},
+				{
+					name: "御守",
+					id: 5,
+					min: 1,
+					max: 2,
+					init(attrs) {
+						attrs.resist_curse = 2;
+					},
+					get(attrs) {
+						return attrs.resist_curse;
+					},
+					set(num) {
+						attrs.resist_curse = num;
+					},
+					check() {
+						return true;
+					},
+					handle() {},
+					getDifficulty(num) {
+						// 作为无副作用遗物，难度固定
+						return 1;
+					},
+				},
+				{
+					name: "套娃",
+					id: 6,
+					min: 1,
+					max: 2,
+					init(attrs) {
+						attrs.un_dolls_treasure = 2;
+					},
+					get(attrs) {
+						return attrs.un_dolls_treasure;
+					},
+					set(num) {
+						attrs.un_dolls_treasure = num;
+					},
+					check() {
+						return true;
+					},
+					handle() {},
+					getDifficulty(num, attrs, index) {
+						// 拿到套娃后要控制开启箱子的数量，因此有难度
+						const dis = Math.abs(num + (attrs.relics - 1 - index) / 4 - 2); // 预期偏差
+						// 每多一个偏差，难度乘以5，因为可以选择不打开宝箱
+						return Math.pow(5, dis);
+					},
+				},
+				{
+					name: "恩洛斯的脸",
+					id: 7,
+					min: 1,
+					max: 1,
+					init(attrs) {
+						attrs.un_eat_treasure = 1;
+					},
+					get(attrs) {
+						return attrs.un_eat_treasure;
+					},
+					set(num) {
+						attrs.un_eat_treasure = num;
+					},
+					check() {
+						return true;
+					},
+					handle() {},
+					getDifficulty(num, attrs, index) {
+						// 拿到恩洛斯的脸后不能再开箱子，因此有难度
+						const dis = Math.abs(num + (attrs.relics - 1 - index) / 4 - 1); // 预期偏差
+						return Math.pow(5, dis);
+					},
+				},
+				{
+					name: "船夹板",
+					id: 8,
+					min: 1,
+					max: 1,
+					init(attrs) {
+						attrs.round_battle = 0;
+					},
+					get(attrs) {
+						return attrs.round_battle < 2 ? 1 : null;
+					},
+					set(num) {
+						attrs.round_battle = num;
+					},
+					check() {
+						return attrs.round_battle < 2;
+					},
+					handle() {},
+					getDifficulty(num) {
+						// 作为无副作用遗物，难度固定
+						return 1;
+					},
+				},
+				{
+					name: "舵盘",
+					id: 9,
+					min: 1,
+					max: 1,
+					init(attrs) {
+						attrs.round_battle = 0;
+					},
+					get(attrs) {
+						return attrs.round_battle < 3 ? 1 : null;
+					},
+					set(num) {
+						attrs.round_battle = num;
+					},
+					check() {
+						return attrs.round_battle < 3;
+					},
+					handle() {},
+					getDifficulty(num) {
+						// 作为无副作用遗物，难度固定
+						return 1;
+					},
+				},
+				{
+					name: "机械臂",
+					id: 11,
+					min: 0,
+					max: 1,
+					init(attrs) {
+						attrs.round_robotic_arm = attrs.round;
+					},
+					get(attrs) {
+						return (attrs.round - attrs.round_robotic_arm) % 2;
+					},
+					check() {
+						return true;
+					},
+					set(num) {
+						attrs.round_robotic_arm = attrs.round - num;
+					},
+					handle() {},
+					getDifficulty(num) {
+						// 作为无副作用遗物，难度固定
+						return 1;
+					},
+				},
+				{
+					name: "历石",
+					id: 12,
+					min: 1,
+					max: 7,
+					init(attrs) {
+						attrs.round_battle = 0;
+					},
+					get(attrs) {
+						return attrs.round_battle > 7 ? null : attrs.round_battle;
+					},
+					check() {
+						return attrs.round_battle <= 7;
+					},
+					set(num) {
+						attrs.round_robotic_arm = num;
+					},
+					handle() {},
+					getDifficulty(num) {
+						// 作为无副作用遗物，难度固定
+						return 1;
+					},
+				},
+				{
+					name: "香炉",
+					id: 13,
+					min: 0,
+					max: 5,
+					init(attrs) {
+						attrs.round_burner = attrs.round;
+					},
+					get(attrs) {
+						return (attrs.round - attrs.round_burner) % 6;
+					},
+					set(num) {
+						attrs.round_burner = attrs.round - num;
+					},
+					check() {
+						return true;
+					},
+					handle() {},
+					getDifficulty(num) {
+						// 作为无副作用遗物，难度固定
+						return 1;
+					},
+				},
+				{
+					name: "开心小花",
+					id: 14,
+					min: 0,
+					max: 2,
+					init(attrs) {
+						attrs.round_flower = attrs.round;
+					},
+					get(attrs) {
+						return (attrs.round - attrs.round_flower) % 3;
+					},
+					set(num) {
+						attrs.round_flower = attrs.round - num;
+					},
+					check() {
+						return true;
+					},
+					handle() {},
+					getDifficulty(num) {
+						// 作为无副作用遗物，难度固定
+						return 1;
+					},
+				},
+				{
+					name: "双截棍",
+					id: 15,
+					min: 0,
+					max: 9,
+					init(attrs) {
+						attrs.card_attack_nunchaku = attrs.card_attack;
+					},
+					get(attrs) {
+						return (attrs.card_attack - attrs.card_attack_nunchaku) % 10;
+					},
+					set(num) {
+						attrs.card_attack_nunchaku = attrs.card_attack - num;
+					},
+					check() {
+						return true;
+					},
+					handle() {},
+					getDifficulty(num) {
+						// 作为无副作用遗物，难度固定
+						return 1;
+					},
+				},
+				{
+					name: "钢笔尖",
+					id: 16,
+					min: 0,
+					max: 9,
+					init(attrs) {
+						attrs.card_attack_pen = attrs.card_attack;
+					},
+					get(attrs) {
+						return (attrs.card_attack - attrs.card_attack_pen) % 10;
+					},
+					set(num) {
+						attrs.card_attack_pen = attrs.card_attack - num;
+					},
+					check() {
+						return true;
+					},
+					handle() {},
+					getDifficulty(num) {
+						// 作为无副作用遗物，难度固定
+						return 1;
+					},
+				},
+				{
+					name: "墨水瓶",
+					id: 17,
+					min: 0,
+					max: 9,
+					init(attrs) {
+						attrs.card_ink = attrs.card;
+					},
+					get(attrs) {
+						return (attrs.card - attrs.card_ink) % 10;
+					},
+					set(num) {
+						attrs.card_ink = attrs.card - num;
+					},
+					check() {
+						return true;
+					},
+					handle() {},
+					getDifficulty(num) {
+						// 作为无副作用遗物，难度固定
+						return 1;
+					},
+				},
+				{
+					name: "开信刀",
+					id: 18,
+					min: 0,
+					max: 2,
+					init(attrs) {
+						attrs.round_skill_card = 0;
+					},
+					get(attrs) {
+						return attrs.round_skill_card % 3;
+					},
+					set(num) {
+						attrs.round_skill_card = num;
+					},
+					check() {
+						return true;
+					},
+					handle() {},
+					getDifficulty(num) {
+						// 作为无副作用遗物，难度固定
+						return 1;
+					},
+				},
+				{
+					name: "手里剑",
+					id: 19,
+					min: 0,
+					max: 2,
+					init(attrs) {
+						attrs.round_attack_card = 0;
+					},
+					get(attrs) {
+						return attrs.round_attack_card % 3;
+					},
+					set(num) {
+						attrs.round_attack_card = num;
+					},
+					check() {
+						return true;
+					},
+					handle() {},
+					getDifficulty(num) {
+						// 作为无副作用遗物，难度固定
+						return 1;
+					},
+				},
+				{
+					name: "折扇",
+					id: 20,
+					min: 0,
+					max: 2,
+					init(attrs) {
+						attrs.round_attack_card = 0;
+					},
+					get(attrs) {
+						return attrs.round_attack_card % 3;
+					},
+					set(num) {
+						attrs.round_attack_card = num;
+					},
+					check() {
+						return true;
+					},
+					handle() {},
+					getDifficulty(num) {
+						// 作为无副作用遗物，难度固定
+						return 1;
+					},
+				},
+				{
+					name: "苦无",
+					id: 21,
+					min: 0,
+					max: 2,
+					init(attrs) {
+						attrs.round_attack_card = 0;
+					},
+					get(attrs) {
+						return attrs.round_attack_card % 3;
+					},
+					set(num) {
+						attrs.round_attack_card = num;
+					},
+					handle() {},
+					getDifficulty(num) {
+						// 作为无副作用遗物，难度固定
+						return 1;
+					},
+				},
+				{
+					name: "天鹅绒颈圈",
+					id: 22,
+					min: 0,
+					max: 6,
+					init(attrs) {
+						attrs.round_card = [0, 1, 2, 3, 4, 5, 6];
+					},
+					get(attrs) {
+						return attrs.round_card;
+					},
+					set(num) {
+						attrs.round_card = num;
+					},
+					check() {
+						return attrs.round_attack_card + attrs.round_skill_card <= 6 && attrs.round_card <= 6;
+					},
+					handle(attrs) {},
+					getDifficulty(num) {
+						// 作为无副作用遗物，难度固定
+						return 1;
+					},
+				},
+				{
+					name: "日晷",
+					id: 23,
+					min: 0,
+					max: 2,
+					init(attrs) {
+						attrs.shuffle = [0, 1, 2];
+					},
+					get(attrs) {
+						return attrs.shuffle;
+					},
+					set(num) {
+						attrs.shuffle = num;
+					},
+					check() {
+						return true;
+					},
+					handle() {},
+					getDifficulty(num) {
+						// 作为无副作用遗物，难度固定
+						return 1;
+					},
+				},
+			];
+
+			const handleRelics = (relicsList, atrrs, relicId) => {
+				const relic = relicsData.find((ele) => ele.id === relicId);
+				relic?.init(atrrs);
+				relicsList.push();
+			};
+			const handleBattleStart = (relicsList, atrrs) => {
+				atrrs.round_battle = 1;
+				atrrs.round++;
+			};
+			const handleRoundStart = (relicsList, atrrs) => {
+				atrrs.round_battle++;
+				atrrs.round++;
+				attrs.round_card = 0;
+				attrs.round_attack_card = 0;
+				attrs.round_skill_card = 0;
+			};
+			const initGame = () => {
+				const relicsList = [];
+				const attrs = {...initAttrs};
+			};
+			/*
+			   给定规定位数的数字或一串数字
+			   从第一个数字开始设置遗物，依次从23个遗物中拿取并触发set、get方法，每set一个遗物数字后都会重新check一遍所有数字是否符合期望，不符合则跳出，直到拿到n个适合的遗物组合
+			   选定固定的遗物组合，从第一个遗物开始，按照回合数和出牌数给出每次拿遗物前需要满足的条件的建议
+			   */
+			function generateArray({min, max}) {
+				var arr = [];
+				for (var i = min; i <= max; i++) {
+					arr.push(i);
+				}
+				return arr;
+			}
+			function generateRandomNumber(max, min = 0) {
+				return Math.floor(Math.random() * (max - min + 1)) + min;
+			}
+			const isVoid = (val) => {
+				return [null, undefined].includes(val);
+			};
+			const startCalculate = (num) => {
+				num = `${num}`;
+				const strList = num.split("");
+				initGame();
+				strList.forEach((str) => {});
+			};
+			const generateDigits = (digits) => {
+				const attrs = {...initAttrs};
+				const record = [];
+				const numList = generateArray({min: 0, max: relicsData.length - 1});
+				let temp;
+				let temp_index;
+				// 生成digits个遗物
+				for (let i = 0; i < digits; i++) {
+					temp_index = generateRandomNumber(numList.length - 1);
+					temp = numList[temp_index];
+					record.push({relic: relicsData[temp], index: i});
+					numList.splice(temp_index, 1);
+				}
+
+				// 是否有天鹅绒颈圈
+				attrs.relics = record.length;
+				attrs.hasCollar = Boolean(record.find((ele) => ele.relic.id === 22));
+
+				attrsKeys.forEach((key) => {
+					setRandomAttrs[key](attrs);
+				});
+				const result = [];
+				let difficulty = 1;
+				if (
+					record.some((ele, i) => {
+						const num = ele.relic.get(attrs);
+						if (isVoid(num)) {
+							return true;
+						}
+						result.push(num);
+						difficulty *= ele.relic.getDifficulty(num, attrs, i);
+					})
+				) {
+					return generateDigits({digits, attrs});
+				}
+				// console.log(
+				// 	`获取难度${difficulty}\n获取顺序：\n${record
+				// 		.map((ele, i) => {
+				// 			return `${ele.relic.name}:${result[i]}, 难度:${ele.relic.getDifficulty(result[i], attrs, i)}`;
+				// 		})
+				// 		.join(";\n")}`
+				// );
+				return {result, record, attrs, difficulty};
+			};
+
+			// let rrr = {
+			// 	difficulty: Number.MAX_SAFE_INTEGER,
+			// };
+			// for (let index = 0; index < 100; index++) {
+			// 	const res = generateDigits({digits: 23, attrs: {...initAttrs}});
+			// 	if (rrr.difficulty > res.difficulty) {
+			// 		rrr = res;
+			// 	}
+			// }
+			// console.log(
+			// 	`获取难度${rrr.difficulty}\n获取顺序：\n${rrr.record
+			// 		.map((ele, i) => {
+			// 			return `${ele.relic.name}:${rrr.result[i]}, 难度:${ele.relic.getDifficulty(rrr.result[i], rrr.attrs, i)}`;
+			// 		})
+			// 		.join(";\n")}`
+			// );
+			function getCombinations(arr, index, current, result) {
+				if (index === arr.length) {
+					result.push(current.slice());
+					return;
+				}
+
+				for (let i = 0; i < arr[index].length; i++) {
+					current.push(arr[index][i]);
+					getCombinations(arr, index + 1, current, result);
+					current.pop();
+				}
+			}
+			const generateNums = (nums) => {
+				nums = `${nums}`;
+				const attrs = {...initAttrs};
+				const digits = nums.length;
+				const record = [];
+				const numList = generateArray({min: 0, max: relicsData.length - 1});
+				let temp;
+				let temp_index;
+				// 生成digits个遗物
+				const l_list = [];
+				for (let i = 0; i < digits; i++) {
+					l_list.push(relicsData.filter((ele) => ele.min <= nums[i] && ele.max >= nums[i]));
+				}
+				const result = [];
+        getCombinations(l_list, 0, [], result);
+        for (let i = 0; i < result.length; i++) {
+          const list = result[i];
+          
+        }
+				return { record, attrs, difficulty};
+			};
+
+			// 穷举所有数字的组合
+			const exhaustiveEnumeration = () => {
+				const result = [];
+				for (let i = 0; i < Math.pow(10, 23); i++) {
+					let permutation = i.toString().padStart(23, "0");
+					// 在这里对每个排列进行处理, 例如输出或执行其他操作
+					generateNums(permutation);
+				}
+			};
+			const searchNums = () => {};
+		</script>
+	</body>
+</html>
